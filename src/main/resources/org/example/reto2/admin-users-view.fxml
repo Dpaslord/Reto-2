@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="430.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.reto2.controllers.AdminUsersController">
+    <children>
+        <TextField fx:id="txtSearchUsers" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="572.0" promptText="Buscar por email..." />
+        <TableView fx:id="tableViewUsers" layoutX="14.0" layoutY="49.0" prefHeight="300.0" prefWidth="572.0">
+            <columns>
+                <TableColumn fx:id="colUserId" prefWidth="50.0" text="ID" />
+                <TableColumn fx:id="colUserEmail" prefWidth="200.0" text="Email" />
+                <TableColumn fx:id="colUserIsAdmin" prefWidth="100.0" text="Admin" />
+                <TableColumn fx:id="colUserCopiasCount" prefWidth="100.0" text="Copias" />
+            </columns>
+        </TableView>
+        <Button layoutX="14.0" layoutY="392.0" mnemonicParsing="false" onAction="#addUser" text="Añadir Usuario" />
+        <Button layoutX="120.0" layoutY="392.0" mnemonicParsing="false" onAction="#editUser" text="Editar Usuario" />
+        <Button layoutX="226.0" layoutY="392.0" mnemonicParsing="false" onAction="#deleteUser" text="Eliminar Usuario" />
+        <Button layoutX="350.0" layoutY="392.0" mnemonicParsing="false" onAction="#goBack" text="Volver" />
+        <Button layoutX="500.0" layoutY="392.0" mnemonicParsing="false" onAction="#logout" text="Cerrar Sesión" />
+    </children>
+</AnchorPane>

@@ -29,72 +29,127 @@ public class UserRepository implements Repository<User> {
 
     /**
      * Guarda una entidad de usuario en la base de datos.
-     * Actualmente no implementado.
+     * Si la entidad ya existe (basado en su ID), la actualiza; de lo contrario, la persiste.
      * @param entity La entidad de usuario a guardar.
-     * @return null (no implementado).
+     * @return La entidad de usuario guardada/actualizada.
      */
     @Override
     public User save(User entity) {
-        logger.warning("Método save para User no implementado.");
-        return null;
+        logger.info("Guardando usuario: " + entity.getEmail());
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.merge(entity); // Usa merge para persistir o actualizar
+            session.getTransaction().commit();
+            logger.info("Usuario " + entity.getEmail() + " guardado exitosamente con ID: " + entity.getId());
+            return entity;
+        } catch (Exception e) {
+            logger.severe("Error al guardar usuario " + entity.getEmail() + ": " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
      * Elimina una entidad de usuario de la base de datos.
-     * Actualmente no implementado.
      * @param entity La entidad de usuario a eliminar.
-     * @return Optional.empty() (no implementado).
+     * @return Un Optional que contiene la entidad eliminada si la operación fue exitosa,
+     *         o un Optional vacío si la entidad no pudo ser eliminada o no existía.
      */
     @Override
     public Optional<User> delete(User entity) {
-        logger.warning("Método delete para User no implementado.");
-        return Optional.empty();
+        logger.info("Intentando eliminar usuario: " + entity.getEmail() + " (ID: " + entity.getId() + ")");
+        try(Session session = sessionFactory.openSession()){
+            session.beginTransaction();
+            session.remove(entity);
+            session.getTransaction().commit();
+            logger.info("Usuario " + entity.getEmail() + " eliminado exitosamente.");
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            logger.severe("Error al eliminar usuario " + entity.getEmail() + ": " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
      * Elimina una entidad de usuario por su ID de la base de datos.
-     * Actualmente no implementado.
      * @param id El ID del usuario a eliminar.
-     * @return Optional.empty() (no implementado).
+     * @return Un Optional que contiene la entidad eliminada si la operación fue exitosa,
+     *         o un Optional vacío si la entidad no pudo ser eliminada o no existía.
      */
     @Override
     public Optional<User> deleteById(Long id) {
-        logger.warning("Método deleteById para User no implementado.");
-        return Optional.empty();
+        logger.info("Intentando eliminar usuario por ID: " + id);
+        try(Session session = sessionFactory.openSession()){
+            User user = session.find(User.class, id.intValue()); // Hibernate IDs are typically Integer for IDENTITY strategy
+            if(user != null){
+                session.beginTransaction();
+                session.remove(user);
+                session.getTransaction().commit();
+                logger.info("Usuario con ID " + id + " eliminado exitosamente.");
+            } else {
+                logger.warning("Usuario con ID " + id + " no encontrado para eliminar.");
+            }
+            return Optional.ofNullable(user);
+        } catch (Exception e) {
+            logger.severe("Error al eliminar usuario por ID " + id + ": " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
      * Busca una entidad de usuario por su ID.
-     * Actualmente no implementado.
      * @param id El ID del usuario a buscar.
-     * @return Optional.empty() (no implementado).
+     * @return Un Optional que contiene el usuario si se encuentra,
+     *         o un Optional vacío si no se encuentra ninguna entidad con ese ID.
      */
     @Override
     public Optional<User> findById(Long id) {
-        logger.warning("Método findById para User no implementado.");
-        return Optional.empty();
+        logger.info("Buscando usuario por ID: " + id);
+        try(Session session = sessionFactory.openSession()){
+            Optional<User> user = Optional.ofNullable(session.find(User.class, id.intValue())); // Hibernate IDs are typically Integer for IDENTITY strategy
+            if (user.isPresent()) {
+                logger.info("Usuario con ID " + id + " encontrado.");
+            } else {
+                logger.info("Usuario con ID " + id + " no encontrado.");
+            }
+            return user;
+        } catch (Exception e) {
+            logger.severe("Error al buscar usuario por ID " + id + ": " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
      * Recupera todas las entidades de usuario de la base de datos.
-     * Actualmente no implementado.
-     * @return Una lista vacía (no implementado).
+     * @return Una Lista de todas las entidades de usuario encontradas.
      */
     @Override
     public List<User> findAll() {
-        logger.warning("Método findAll para User no implementado.");
-        return List.of();
+        logger.info("Recuperando todos los usuarios.");
+        try (Session session = sessionFactory.openSession()) {
+            List<User> users = session.createQuery("from User", User.class).list();
+            logger.info(users.size() + " usuarios recuperados.");
+            return users;
+        } catch (Exception e) {
+            logger.severe("Error al recuperar todos los usuarios: " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
      * Cuenta el número total de entidades de usuario en la base de datos.
-     * Actualmente no implementado.
-     * @return 0L (no implementado).
+     * @return El número total de usuarios.
      */
     @Override
     public Long count() {
-        logger.warning("Método count para User no implementado.");
-        return 0L;
+        logger.info("Contando el número de usuarios.");
+        try (Session session = sessionFactory.openSession()) {
+            Long count = session.createQuery("select count(u) from User u", Long.class).uniqueResult();
+            logger.info("Número total de usuarios: " + count);
+            return count;
+        } catch (Exception e) {
+            logger.severe("Error al contar usuarios: " + e.getMessage());
+            throw e;
+        }
     }
 
     /**

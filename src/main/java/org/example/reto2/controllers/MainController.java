@@ -2,11 +2,16 @@ package org.example.reto2.controllers;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import org.example.reto2.copia.Copia;
@@ -17,6 +22,7 @@ import org.example.reto2.user.User;
 import org.example.reto2.utils.JavaFXUtil;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -39,9 +45,13 @@ public class MainController implements Initializable {
     private TableColumn<Copia, String> colSoporte;
     @javafx.fxml.FXML
     private TableColumn<Copia, Integer> colCantidad;
+    @javafx.fxml.FXML
+    private TextField txtSearch; // Campo de búsqueda
 
     private User currentUser;
     private CopiaService copiaService;
+    private ObservableList<Copia> masterData = FXCollections.observableArrayList();
+    private FilteredList<Copia> filteredData;
 
     /**
      * Inicializa el controlador después de que su elemento raíz ha sido completamente procesado.
@@ -61,6 +71,41 @@ public class MainController implements Initializable {
         colSoporte.setCellValueFactory(new PropertyValueFactory<>("soporte"));
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
 
+        // 1. Inicializar masterData y filteredData
+        masterData.addAll(currentUser.getCopias());
+        filteredData = new FilteredList<>(masterData, p -> true);
+
+        // 2. Añadir listener al campo de búsqueda
+        txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(copia -> {
+                // Si el campo de búsqueda está vacío, muestra todas las copias.
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (copia.getPelicula().getTitulo().toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Coincide con el título de la película.
+                } else if (copia.getEstado().toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Coincide con el estado de la copia.
+                } else if (copia.getSoporte().toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Coincide con el soporte de la copia.
+                }
+                return false; // No hay coincidencia.
+            });
+        });
+
+        // 3. Envolver la FilteredList en una SortedList.
+        SortedList<Copia> sortedData = new SortedList<>(filteredData);
+
+        // 4. Vincular el comparador de SortedList al comparador de TableView.
+        sortedData.comparatorProperty().bind(tableView.comparatorProperty());
+
+        // 5. Añadir los datos ordenados (y filtrados) a la tabla.
+        tableView.setItems(sortedData);
+
+
         tableView.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 Copia selectedCopia = tableView.getSelectionModel().getSelectedItem();
@@ -77,7 +122,7 @@ public class MainController implements Initializable {
             }
         });
 
-        refreshTable();
+        refreshTable(); // La llamada inicial a refreshTable ya poblará masterData
         logger.info("MainController inicializado para el usuario: " + currentUser.getEmail());
     }
 
@@ -107,17 +152,32 @@ public class MainController implements Initializable {
     /**
      * Maneja la acción de eliminar una copia seleccionada de la tabla.
      * Si la copia tiene cantidad > 1, decrementa la cantidad. Si es 1, la elimina.
+     * Incluye un diálogo de confirmación.
      * @param actionEvent El evento de acción que disparó este método.
      */
     @javafx.fxml.FXML
     public void deleteCopia(ActionEvent actionEvent) {
         Copia selectedCopia = tableView.getSelectionModel().getSelectedItem();
         if (selectedCopia != null) {
-            logger.info("Intentando eliminar/decrementar copia con ID: " + selectedCopia.getId());
-            currentUser = copiaService.deleteCopiaFromUser(currentUser, selectedCopia);
-            SimpleSessionService.getInstance().setObject("user", currentUser); // Actualizar usuario en sesión
-            refreshTable();
-            logger.info("Operación de eliminación/decremento de copia completada. Tabla refrescada.");
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmar Eliminación");
+            alert.setHeaderText("¿Está seguro de que desea eliminar/decrementar esta copia?");
+            alert.setContentText("Película: " + selectedCopia.getPelicula().getTitulo() + "\n" +
+                                 "Estado: " + selectedCopia.getEstado() + "\n" +
+                                 "Soporte: " + selectedCopia.getSoporte() + "\n" +
+                                 "Cantidad actual: " + selectedCopia.getCantidad() +
+                                 "\n\nSi la cantidad es mayor que 1, se decrementará. Si es 1, la copia se eliminará por completo.");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                logger.info("Usuario confirmó eliminación/decremento de copia con ID: " + selectedCopia.getId());
+                currentUser = copiaService.deleteCopiaFromUser(currentUser, selectedCopia);
+                SimpleSessionService.getInstance().setObject("user", currentUser); // Actualizar usuario en sesión
+                refreshTable();
+                logger.info("Operación de eliminación/decremento de copia completada. Tabla refrescada.");
+            } else {
+                logger.info("Usuario canceló la eliminación/decremento de copia con ID: " + selectedCopia.getId());
+            }
         } else {
             JavaFXUtil.showModal(Alert.AlertType.WARNING, "Ninguna copia seleccionada", "Por favor, selecciona una copia para eliminar.", "");
             logger.warning("Intento de eliminar copia sin selección.");
@@ -159,7 +219,9 @@ public class MainController implements Initializable {
     private void refreshTable() {
         logger.info("Refrescando tabla de copias para el usuario: " + currentUser.getEmail());
         currentUser = (User) SimpleSessionService.getInstance().getObject("user"); // Asegurarse de tener la última versión del usuario
-        tableView.setItems(FXCollections.observableList(currentUser.getCopias()));
+        masterData.clear();
+        masterData.addAll(currentUser.getCopias());
+        // No es necesario llamar a tableView.setItems(sortedData) de nuevo, ya está vinculado
         tableView.refresh();
         logger.info("Tabla de copias refrescada. Número de copias: " + currentUser.getCopias().size());
     }

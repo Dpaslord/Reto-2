@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="250.0" prefWidth="350.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.reto2.controllers.EditUserController">
+    <children>
+        <Label layoutX="120.0" layoutY="10.0" text="Editar Usuario" />
+        <Label layoutX="50.0" layoutY="30.0" text="Email:" />
+        <TextField fx:id="txtEmail" layoutX="150.0" layoutY="26.0" prefWidth="150.0" disable="true" /> <!-- Email no editable -->
+
+        <Label layoutX="50.0" layoutY="70.0" text="Nueva Contraseña:" />
+        <PasswordField fx:id="pwdPassword" layoutX="150.0" layoutY="66.0" prefWidth="150.0" promptText="Dejar vacío para no cambiar" />
+
+        <Label layoutX="50.0" layoutY="110.0" text="Confirmar Contraseña:" />
+        <PasswordField fx:id="pwdConfirmPassword" layoutX="150.0" layoutY="106.0" prefWidth="150.0" />
+
+        <CheckBox fx:id="chkIsAdmin" layoutX="150.0" layoutY="150.0" text="Es Administrador" />
+
+        <Button layoutX="150.0" layoutY="190.0" mnemonicParsing="false" onAction="#saveUser" text="Guardar Cambios" />
+        <Button layoutX="250.0" layoutY="190.0" mnemonicParsing="false" onAction="#cancel" text="Cancelar" />
+    </children>
+</AnchorPane>
