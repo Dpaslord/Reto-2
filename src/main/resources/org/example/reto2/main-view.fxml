@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.reto2.controllers.MainController">
+    <children>
+        <TableView fx:id="tableView" layoutX="14.0" layoutY="14.0" prefHeight="324.0" prefWidth="572.0">
+            <columns>
+                <TableColumn fx:id="colTitulo" prefWidth="180.0" text="Título" />
+                <TableColumn fx:id="colEstado" prefWidth="100.0" text="Estado" />
+                <TableColumn fx:id="colSoporte" prefWidth="100.0" text="Soporte" />
+                <TableColumn fx:id="colCantidad" prefWidth="80.0" text="Cantidad" />
+            </columns>
+        </TableView>
+        <Button layoutX="14.0" layoutY="357.0" mnemonicParsing="false" onAction="#deleteCopia" text="Eliminar Copia" />
+        <Button layoutX="120.0" layoutY="357.0" mnemonicParsing="false" onAction="#addCopia" text="Añadir Copia" />
+        <Button layoutX="220.0" layoutY="357.0" mnemonicParsing="false" onAction="#editCopia" text="Editar Copia" />
+        <Button layoutX="459.0" layoutY="357.0" mnemonicParsing="false" onAction="#logout" text="Cerrar Sesión" />
+        <Button layoutX="550.0" layoutY="357.0" mnemonicParsing="false" onAction="#close" text="Salir" />
+    </children>
+</AnchorPane>

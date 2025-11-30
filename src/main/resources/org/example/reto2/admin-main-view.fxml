@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.reto2.controllers.AdminMainController">
+    <children>
+        <TableView fx:id="tableViewPeliculas" layoutX="14.0" layoutY="14.0" prefHeight="300.0" prefWidth="572.0">
+            <columns>
+                <TableColumn fx:id="colTitulo" prefWidth="100.0" text="Título" />
+                <TableColumn fx:id="colGenero" prefWidth="80.0" text="Género" />
+                <TableColumn fx:id="colAnio" prefWidth="60.0" text="Año" />
+                <TableColumn fx:id="colDirector" prefWidth="100.0" text="Director" />
+                <TableColumn fx:id="colDescripcion" prefWidth="230.0" text="Descripción" />
+            </columns>
+        </TableView>
+        <Button layoutX="14.0" layoutY="330.0" mnemonicParsing="false" onAction="#addPelicula" text="Añadir Película" />
+        <Button layoutX="500.0" layoutY="330.0" mnemonicParsing="false" onAction="#logout" text="Cerrar Sesión" />
+    </children>
+</AnchorPane>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="240.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.reto2.controllers.AddCopiaController">
+    <children>
+        <ComboBox fx:id="comboPelicula" layoutX="75.0" layoutY="30.0" prefWidth="150.0" promptText="Selecciona una película" />
+        <ComboBox fx:id="comboEstado" layoutX="75.0" layoutY="70.0" prefWidth="150.0" promptText="Estado" />
+        <ComboBox fx:id="comboSoporte" layoutX="75.0" layoutY="110.0" prefWidth="150.0" promptText="Soporte" />
+        <TextField fx:id="txtCantidad" layoutX="75.0" layoutY="150.0" promptText="Cantidad" />
+        <Button layoutX="75.0" layoutY="190.0" onAction="#addCopia" text="Añadir" />
+        <Button layoutX="150.0" layoutY="190.0" onAction="#cancel" text="Cancelar" />
+    </children>
+</AnchorPane>
