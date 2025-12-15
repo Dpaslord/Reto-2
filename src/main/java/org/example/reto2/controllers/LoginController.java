@@ -77,21 +77,22 @@ public class LoginController implements Initializable {
                 ButtonType btnPeliculas = new ButtonType("Ver Películas (Admin)");
                 ButtonType btnCopias = new ButtonType("Ver Mis Copias (Usuario)");
 
-                alert.getButtonTypes().setAll(btnPeliculas, btnCopias);
+                alert.getButtonTypes().setAll(btnPeliculas, btnCopias, ButtonType.CANCEL);
                 alert.initOwner(JavaFXUtil.getStage(actionEvent));
 
                 Optional<ButtonType> result = alert.showAndWait();
 
-                if (result.isPresent() && result.get() == btnPeliculas) {
+                if (result.isEmpty() || result.get() == ButtonType.CANCEL) {
+                    // Caso: el usuario cierra el diálogo con la 'X' o pulsa "Cancelar"
+                    sessionService.logout();
+                    info.setText("Inicio de sesión cancelado.");
+                    logger.info("Administrador canceló la selección, cerrando sesión.");
+                } else if (result.get() == btnPeliculas) {
                     JavaFXUtil.setScene("/org/example/reto2/admin-main-view.fxml");
                     logger.info("Administrador seleccionó ver películas.");
-                } else if (result.isPresent() && result.get() == btnCopias) {
+                } else if (result.get() == btnCopias) {
                     JavaFXUtil.setScene("/org/example/reto2/main-view.fxml");
                     logger.info("Administrador seleccionó ver sus copias.");
-                } else {
-                    // Si cierra el modal o no selecciona nada, por defecto a la vista de usuario
-                    JavaFXUtil.setScene("/org/example/reto2/main-view.fxml");
-                    logger.info("Administrador no seleccionó vista, redirigiendo a vista de usuario por defecto.");
                 }
             } else {
                 JavaFXUtil.setScene("/org/example/reto2/main-view.fxml");

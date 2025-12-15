@@ -4,6 +4,7 @@ import org.example.reto2.user.User;
 import org.example.reto2.utils.DataProvider;
 import org.hibernate.Session;
 
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -61,6 +62,7 @@ public class CopiaService {
 
     /**
      * Crea y añade una nueva copia de película a la colección de un usuario.
+     * Si ya existe una copia con los mismos atributos, incrementa su cantidad.
      *
      * @param newCopia La nueva copia a añadir.
      * @param actualUser El usuario al que se le añadirá la copia.
@@ -69,12 +71,31 @@ public class CopiaService {
     public User createNewCopia(Copia newCopia, User actualUser) {
         logger.info("Intentando crear nueva copia para la película " + newCopia.getPelicula().getTitulo() + " y el usuario " + actualUser.getEmail());
         try(Session s = DataProvider.getSessionFactory().openSession()) {
-            actualUser.addCopia(newCopia); // Establece la relación bidireccional
             s.beginTransaction();
-            s.merge(actualUser); // Persiste los cambios en el usuario (que incluye la nueva copia)
+            User user = s.find(User.class, actualUser.getId());
+
+            // Buscar si ya existe una copia con los mismos atributos
+            Optional<Copia> existingCopia = user.getCopias().stream()
+                    .filter(c -> c.getPelicula().getId().equals(newCopia.getPelicula().getId())
+                            && c.getEstado().equals(newCopia.getEstado())
+                            && c.getSoporte().equals(newCopia.getSoporte()))
+                    .findFirst();
+
+            if (existingCopia.isPresent()) {
+                // Si existe, sumar la cantidad
+                Copia copia = existingCopia.get();
+                copia.setCantidad(copia.getCantidad() + newCopia.getCantidad());
+                s.merge(copia);
+                logger.info("Copia existente encontrada. Cantidad actualizada a " + copia.getCantidad());
+            } else {
+                // Si no existe, añadir la nueva copia
+                user.addCopia(newCopia);
+                s.merge(user);
+                logger.info("Nueva copia creada y añadida al usuario " + user.getEmail() + ". ID de copia: " + newCopia.getId());
+            }
+
             s.getTransaction().commit();
-            logger.info("Nueva copia creada y añadida al usuario " + actualUser.getEmail() + ". ID de copia: " + newCopia.getId());
-            return s.find(User.class, actualUser.getId()); // Devuelve el usuario actualizado desde la DB
+            return s.find(User.class, user.getId()); // Devuelve el usuario actualizado desde la DB
         } catch (Exception e) {
             logger.severe("Error al crear nueva copia para el usuario " + actualUser.getEmail() + ": " + e.getMessage());
             throw e;

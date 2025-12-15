@@ -32,7 +32,6 @@ public class DataProvider {
             logger.info("Inicializando SessionFactory de Hibernate...");
             try {
                 var configuration = new Configuration().configure();
-                // Se asume que DB_USER y DB_PASSWORD están configuradas como variables de entorno
                 String dbUser = System.getenv("DB_USER");
                 String dbPassword = System.getenv("DB_PASSWORD");
 

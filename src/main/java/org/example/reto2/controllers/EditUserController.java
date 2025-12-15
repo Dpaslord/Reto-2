@@ -13,6 +13,7 @@ import org.example.reto2.utils.DataProvider;
 import org.example.reto2.utils.JavaFXUtil;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -70,9 +71,16 @@ public class EditUserController implements Initializable {
     public void saveUser(ActionEvent actionEvent) {
         logger.info("Intento de guardar cambios para el usuario con ID: " + (userToEdit != null ? userToEdit.getId() : "N/A"));
         if (userToEdit != null) {
+            String newEmail = txtEmail.getText();
             String newPassword = pwdPassword.getText();
             String confirmPassword = pwdConfirmPassword.getText();
             Boolean isAdmin = chkIsAdmin.isSelected();
+
+            if (newEmail.isEmpty()) {
+                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Campo Vacío", "El email no puede estar vacío.", "");
+                logger.warning("Intento de guardar usuario con email vacío.");
+                return;
+            }
 
             if (!newPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
                 JavaFXUtil.showModal(Alert.AlertType.WARNING, "Contraseñas no coinciden", "Las nuevas contraseñas no coinciden.", "");
@@ -80,7 +88,16 @@ public class EditUserController implements Initializable {
                 return;
             }
 
+            // Comprobar si el nuevo email ya está en uso por OTRO usuario
+            Optional<User> userWithSameEmail = userRepository.findByEmail(newEmail);
+            if (userWithSameEmail.isPresent() && !userWithSameEmail.get().getId().equals(userToEdit.getId())) {
+                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Email Duplicado", "El email introducido ya está registrado por otro usuario.", "");
+                logger.warning("Intento de cambiar email a uno duplicado.");
+                return;
+            }
+
             try {
+                userToEdit.setEmail(newEmail);
                 if (!newPassword.isEmpty()) {
                     userToEdit.setPassword(newPassword); // ¡IMPORTANTE! En un entorno real, aquí se debería hashear la contraseña.
                     logger.info("Contraseña del usuario " + userToEdit.getEmail() + " será actualizada.");

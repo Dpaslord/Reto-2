@@ -12,6 +12,7 @@ import org.example.reto2.utils.DataProvider;
 import org.example.reto2.utils.JavaFXUtil;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -73,7 +74,13 @@ public class AddUserController implements Initializable {
             return;
         }
 
-        // Aquí se podría añadir validación de formato de email, complejidad de contraseña, etc.
+        // Comprobar si el email ya existe
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Email Duplicado", "El email introducido ya está registrado.", "");
+            logger.warning("Intento de añadir un usuario con un email duplicado.");
+            return;
+        }
 
         try {
             User newUser = new User();

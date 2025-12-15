@@ -11,6 +11,7 @@ import org.example.reto2.utils.DataProvider;
 import org.example.reto2.utils.JavaFXUtil;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -57,20 +58,76 @@ public class AddPeliculaController implements Initializable {
     @javafx.fxml.FXML
     public void addPelicula(ActionEvent actionEvent) {
         logger.info("Intento de añadir nueva película.");
+        
+        // Validación de campos vacíos
+        if (txtTitulo.getText().isEmpty() || txtGenero.getText().isEmpty() || txtAnio.getText().isEmpty() ||
+            txtDirector.getText().isEmpty() || txtDescripcion.getText().isEmpty()) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Campos Vacíos", "Todos los campos son obligatorios.", "Por favor, rellene todos los campos.");
+            logger.warning("Intento de añadir película con campos vacíos.");
+            return;
+        }
+
+        // Validación de longitud de campos
+        if (txtTitulo.getText().length() > 255) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Título demasiado largo", "El título no puede exceder los 255 caracteres.", "");
+            logger.warning("Intento de añadir película con título demasiado largo.");
+            return;
+        }
+        if (txtGenero.getText().length() > 255) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Género demasiado largo", "El género no puede exceder los 255 caracteres.", "");
+            logger.warning("Intento de añadir película con género demasiado largo.");
+            return;
+        }
+        if (txtDirector.getText().length() > 255) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Director demasiado largo", "El nombre del director no puede exceder los 255 caracteres.", "");
+            logger.warning("Intento de añadir película con nombre de director demasiado largo.");
+            return;
+        }
+        if (txtDescripcion.getText().length() > 500) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Descripción demasiado larga", "La descripción no puede exceder los 500 caracteres.", "");
+            logger.warning("Intento de añadir película con descripción demasiado larga.");
+            return;
+        }
+
+        // Validación de campos no numéricos
+        if (!txtGenero.getText().matches(".*[a-zA-Z]+.*")) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Género Inválido", "El género no puede ser solo números.", "");
+            logger.warning("Intento de añadir película con género puramente numérico.");
+            return;
+        }
+        if (!txtDirector.getText().matches(".*[a-zA-Z]+.*")) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Director Inválido", "El nombre del director no puede ser solo números.", "");
+            logger.warning("Intento de añadir película con director puramente numérico.");
+            return;
+        }
+
         try {
+            // Validar y parsear el año
+            String anioStr = txtAnio.getText();
+            if (!anioStr.matches("\\d{4}")) {
+                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Año Inválido", "El año debe ser un número de 4 dígitos.", "");
+                logger.warning("Formato de año inválido al intentar añadir película: " + anioStr);
+                return;
+            }
+            int anio = Integer.parseInt(anioStr);
+            if (anio < 1950 || anio > 2025) {
+                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Año fuera de rango", "El año debe estar entre 1950 y 2025.", "");
+                logger.warning("Año fuera de rango al intentar añadir película: " + anio);
+                return;
+            }
+
+            // Comprobar si ya existe una película con los mismos atributos
+            Optional<Pelicula> existingPelicula = peliculaRepository.findByAttributes(txtTitulo.getText(), anio, txtDirector.getText());
+            if (existingPelicula.isPresent()) {
+                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Película Duplicada", "Ya existe una película con el mismo título, año y director.", "");
+                logger.warning("Intento de añadir una película duplicada.");
+                return;
+            }
+
             Pelicula newPelicula = new Pelicula();
             newPelicula.setTitulo(txtTitulo.getText());
             newPelicula.setGenero(txtGenero.getText());
-            
-            // Validar y parsear el año
-            int anio = Integer.parseInt(txtAnio.getText());
-            if (anio <= 0) {
-                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Año Inválido", "El año debe ser un número positivo.", "");
-                logger.warning("Año inválido (<= 0) al intentar añadir película.");
-                return;
-            }
             newPelicula.setAnio(anio);
-            
             newPelicula.setDirector(txtDirector.getText());
             newPelicula.setDescripcion(txtDescripcion.getText());
 

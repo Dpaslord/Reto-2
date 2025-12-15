@@ -72,15 +72,65 @@ public class EditPeliculaController implements Initializable {
     @javafx.fxml.FXML
     public void savePelicula(ActionEvent actionEvent) {
         logger.info("Intento de guardar cambios para la película con ID: " + (peliculaToEdit != null ? peliculaToEdit.getId() : "N/A"));
+        
+        // Validación de campos vacíos
+        if (txtTitulo.getText().isEmpty() || txtGenero.getText().isEmpty() || txtAnio.getText().isEmpty() ||
+            txtDirector.getText().isEmpty() || txtDescripcion.getText().isEmpty()) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Campos Vacíos", "Todos los campos son obligatorios.", "Por favor, rellene todos los campos.");
+            logger.warning("Intento de guardar película con campos vacíos.");
+            return;
+        }
+
+        // Validación de longitud de campos
+        if (txtTitulo.getText().length() > 255) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Título demasiado largo", "El título no puede exceder los 255 caracteres.", "");
+            logger.warning("Intento de guardar película con título demasiado largo.");
+            return;
+        }
+        if (txtGenero.getText().length() > 255) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Género demasiado largo", "El género no puede exceder los 255 caracteres.", "");
+            logger.warning("Intento de guardar película con género demasiado largo.");
+            return;
+        }
+        if (txtDirector.getText().length() > 255) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Director demasiado largo", "El nombre del director no puede exceder los 255 caracteres.", "");
+            logger.warning("Intento de guardar película con nombre de director demasiado largo.");
+            return;
+        }
+        if (txtDescripcion.getText().length() > 500) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Descripción demasiado larga", "La descripción no puede exceder los 500 caracteres.", "");
+            logger.warning("Intento de guardar película con descripción demasiado larga.");
+            return;
+        }
+
+        // Validación de campos no numéricos
+        if (!txtGenero.getText().matches(".*[a-zA-Z]+.*")) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Género Inválido", "El género no puede ser solo números.", "");
+            logger.warning("Intento de guardar película con género puramente numérico.");
+            return;
+        }
+        if (!txtDirector.getText().matches(".*[a-zA-Z]+.*")) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Director Inválido", "El nombre del director no puede ser solo números.", "");
+            logger.warning("Intento de guardar película con director puramente numérico.");
+            return;
+        }
+
         if (peliculaToEdit != null) {
             try {
                 peliculaToEdit.setTitulo(txtTitulo.getText());
                 peliculaToEdit.setGenero(txtGenero.getText());
 
-                int anio = Integer.parseInt(txtAnio.getText());
-                if (anio <= 0) {
-                    JavaFXUtil.showModal(Alert.AlertType.WARNING, "Año Inválido", "El año debe ser un número positivo.", "");
-                    logger.warning("Año inválido (<= 0) al intentar guardar película.");
+                // Validar y parsear el año
+                String anioStr = txtAnio.getText();
+                if (!anioStr.matches("\\d{4}")) {
+                    JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Año Inválido", "El año debe ser un número de 4 dígitos.", "");
+                    logger.warning("Formato de año inválido al intentar guardar película: " + anioStr);
+                    return;
+                }
+                int anio = Integer.parseInt(anioStr);
+                if (anio < 1950 || anio > 2025) {
+                    JavaFXUtil.showModal(Alert.AlertType.WARNING, "Año fuera de rango", "El año debe estar entre 1950 y 2025.", "");
+                    logger.warning("Año fuera de rango al intentar guardar película: " + anio);
                     return;
                 }
                 peliculaToEdit.setAnio(anio);

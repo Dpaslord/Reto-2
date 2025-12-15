@@ -5,7 +5,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 import org.example.reto2.copia.Copia;
 import org.example.reto2.copia.CopiaService;
 import org.example.reto2.pelicula.Pelicula;
@@ -16,7 +19,6 @@ import org.example.reto2.utils.DataProvider;
 import org.example.reto2.utils.JavaFXUtil;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -55,9 +57,35 @@ public class AddCopiaController implements Initializable {
         copiaService = new CopiaService();
         currentUser = (User) SimpleSessionService.getInstance().getObject("user");
 
+        // Configurar el ComboBox de Películas para mostrar solo el título
         comboPelicula.setItems(FXCollections.observableList(peliculaRepository.findAll()));
+        comboPelicula.setConverter(new StringConverter<Pelicula>() {
+            @Override
+            public String toString(Pelicula pelicula) {
+                return pelicula == null ? null : pelicula.getTitulo();
+            }
+
+            @Override
+            public Pelicula fromString(String string) {
+                return comboPelicula.getItems().stream().filter(p -> 
+                    p.getTitulo().equals(string)).findFirst().orElse(null);
+            }
+        });
+
+        comboPelicula.setCellFactory(param -> new ListCell<Pelicula>() {
+            @Override
+            protected void updateItem(Pelicula item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getTitulo());
+                }
+            }
+        });
+
         comboEstado.setItems(FXCollections.observableArrayList("bueno", "gastado", "dañado"));
-        comboSoporte.setItems(FXCollections.observableArrayList("dvd", "blue-ray")); // Corregido
+        comboSoporte.setItems(FXCollections.observableArrayList("dvd", "blue-ray"));
 
         logger.info("AddCopiaController inicializado. Películas y opciones cargadas.");
     }
@@ -82,10 +110,15 @@ public class AddCopiaController implements Initializable {
         }
 
         try {
+            if (!cantidadText.matches("\\d+")) {
+                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Cantidad Inválido", "La cantidad debe ser un número entero.", "");
+                logger.warning("Formato de cantidad inválido al intentar añadir copia: " + cantidadText);
+                return;
+            }
             int cantidad = Integer.parseInt(cantidadText);
-            if (cantidad <= 0) {
-                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Cantidad Inválida", "La cantidad debe ser un número positivo.", "");
-                logger.warning("Cantidad inválida (<= 0) al intentar añadir copia.");
+            if (cantidad <= 0 || cantidad > 9999) {
+                JavaFXUtil.showModal(Alert.AlertType.WARNING, "Cantidad Inválida", "La cantidad debe ser un número entre 1 y 9999.", "");
+                logger.warning("Cantidad inválida (fuera de rango) al intentar añadir copia.");
                 return;
             }
 

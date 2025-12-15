@@ -145,6 +145,14 @@ public class AdminUsersController implements Initializable {
     public void deleteUser(ActionEvent actionEvent) {
         User selectedUser = tableViewUsers.getSelectionModel().getSelectedItem();
         if (selectedUser != null) {
+            // Impedir que el administrador se elimine a sí mismo
+            User currentUser = (User) SimpleSessionService.getInstance().getObject("user");
+            if (currentUser != null && currentUser.getId().equals(selectedUser.getId())) {
+                JavaFXUtil.showModal(Alert.AlertType.ERROR, "Acción no permitida", "No puede eliminarse a sí mismo.", "");
+                logger.warning("Intento de auto-eliminación por parte del administrador.");
+                return;
+            }
+
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirmar Eliminación");
             alert.setHeaderText("¿Está seguro de que desea eliminar el usuario?");
@@ -154,11 +162,17 @@ public class AdminUsersController implements Initializable {
 
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                logger.info("Administrador confirmó eliminación de usuario con ID: " + selectedUser.getId());
-                // Es importante que el ID del usuario sea Long para el método deleteById
-                userRepository.deleteById(selectedUser.getId().longValue());
-                refreshTable();
-                logger.info("Usuario eliminado. Tabla refrescada.");
+                try {
+                    logger.info("Administrador confirmó eliminación de usuario con ID: " + selectedUser.getId());
+                    userRepository.deleteById(selectedUser.getId().longValue());
+                    refreshTable();
+                    logger.info("Usuario eliminado. Tabla refrescada.");
+                } catch (Exception e) {
+                    logger.severe("Error al eliminar usuario: " + e.getMessage());
+                    JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error de Eliminación", 
+                                        "No se pudo eliminar el usuario.", 
+                                        "Es posible que el usuario tenga copias asociadas y no pueda ser borrado.");
+                }
             } else {
                 logger.info("Administrador canceló la eliminación de usuario con ID: " + selectedUser.getId());
             }

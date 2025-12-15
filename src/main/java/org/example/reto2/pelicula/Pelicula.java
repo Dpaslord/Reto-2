@@ -24,11 +24,9 @@ public class Pelicula implements Serializable {
 
     private String titulo;
     private String genero;
+    @Column(name = "año")
     private Integer anio;
     private String descripcion;
     private String director;
 
-    // Constructor, getters y setters son generados por Lombok (@Data)
-    // No se añaden métodos específicos para logging aquí, ya que las operaciones
-    // sobre Pelicula se registran en PeliculaRepository.
 }

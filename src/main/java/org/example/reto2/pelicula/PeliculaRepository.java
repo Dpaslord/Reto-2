@@ -3,6 +3,7 @@ package org.example.reto2.pelicula;
 import org.example.reto2.utils.Repository;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class PeliculaRepository implements Repository<Pelicula> {
         logger.info("Guardando película: " + entity.getTitulo());
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
-            session.persist(entity); // o session.merge(entity) si ya tiene ID
+            session.merge(entity); // Usa merge para persistir o actualizar
             session.getTransaction().commit();
             logger.info("Película " + entity.getTitulo() + " guardada exitosamente con ID: " + entity.getId());
             return entity;
@@ -147,6 +148,28 @@ public class PeliculaRepository implements Repository<Pelicula> {
         } catch (Exception e) {
             logger.severe("Error al contar películas: " + e.getMessage());
             throw e;
+        }
+    }
+
+    /**
+     * Busca una película por sus atributos para evitar duplicados.
+     * @param titulo El título de la película.
+     * @param anio El año de la película.
+     * @param director El director de la película.
+     * @return Un Optional que contiene la película si se encuentra, o un Optional vacío si no.
+     */
+    public Optional<Pelicula> findByAttributes(String titulo, int anio, String director) {
+        logger.info("Buscando película por atributos: " + titulo);
+        try (Session session = sessionFactory.openSession()) {
+            Query<Pelicula> q = session.createQuery(
+                    "from Pelicula where titulo = :titulo and anio = :anio and director = :director", Pelicula.class);
+            q.setParameter("titulo", titulo);
+            q.setParameter("anio", anio);
+            q.setParameter("director", director);
+            return Optional.ofNullable(q.uniqueResult());
+        } catch (Exception e) {
+            logger.severe("Error al buscar película por atributos: " + e.getMessage());
+            return Optional.empty();
         }
     }
 }

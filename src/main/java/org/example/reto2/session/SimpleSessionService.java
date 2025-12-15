@@ -48,7 +48,7 @@ public class SimpleSessionService implements SessionService<User> {
     }
 
     /**
-     * Cierra la sesión actual, estableciendo el usuario activo a null.
+     * Cierra la sesión actual, estableciendo el usuario activo a null y limpiando los objetos de sesión.
      */
     @Override
     public void logout() {

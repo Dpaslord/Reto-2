@@ -153,10 +153,17 @@ public class AdminMainController implements Initializable {
 
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                logger.info("Administrador confirmó eliminación de película con ID: " + selectedPelicula.getId());
-                peliculaRepository.delete(selectedPelicula); // Asumiendo que delete devuelve Optional<Pelicula>
-                refreshTable();
-                logger.info("Película eliminada. Tabla refrescada.");
+                try {
+                    logger.info("Administrador confirmó eliminación de película con ID: " + selectedPelicula.getId());
+                    peliculaRepository.delete(selectedPelicula);
+                    refreshTable();
+                    logger.info("Película eliminada. Tabla refrescada.");
+                } catch (Exception e) {
+                    logger.severe("Error al eliminar película: " + e.getMessage());
+                    JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error de Eliminación", 
+                                        "No se pudo eliminar la película.", 
+                                        "Es posible que la película tenga copias asociadas y no pueda ser borrada.");
+                }
             } else {
                 logger.info("Administrador canceló la eliminación de película con ID: " + selectedPelicula.getId());
             }

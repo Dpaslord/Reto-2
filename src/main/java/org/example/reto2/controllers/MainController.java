@@ -170,11 +170,18 @@ public class MainController implements Initializable {
 
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                logger.info("Usuario confirmó eliminación/decremento de copia con ID: " + selectedCopia.getId());
-                currentUser = copiaService.deleteCopiaFromUser(currentUser, selectedCopia);
-                SimpleSessionService.getInstance().setObject("user", currentUser); // Actualizar usuario en sesión
-                refreshTable();
-                logger.info("Operación de eliminación/decremento de copia completada. Tabla refrescada.");
+                try {
+                    logger.info("Usuario confirmó eliminación/decremento de copia con ID: " + selectedCopia.getId());
+                    currentUser = copiaService.deleteCopiaFromUser(currentUser, selectedCopia);
+                    SimpleSessionService.getInstance().setObject("user", currentUser); // Actualizar usuario en sesión
+                    refreshTable();
+                    logger.info("Operación de eliminación/decremento de copia completada. Tabla refrescada.");
+                } catch (Exception e) {
+                    logger.severe("Error al eliminar/decrementar copia: " + e.getMessage());
+                    JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error de Eliminación", 
+                                        "No se pudo eliminar la copia.", 
+                                        "Ocurrió un error inesperado. Por favor, intente de nuevo.");
+                }
             } else {
                 logger.info("Usuario canceló la eliminación/decremento de copia con ID: " + selectedCopia.getId());
             }
