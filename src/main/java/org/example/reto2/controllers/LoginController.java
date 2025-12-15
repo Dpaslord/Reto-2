@@ -2,10 +2,7 @@ package org.example.reto2.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import org.example.reto2.session.AuthService;
 import org.example.reto2.session.SimpleSessionService;
 import org.example.reto2.user.User;
@@ -28,14 +25,14 @@ public class LoginController implements Initializable {
     private static final Logger logger = Logger.getLogger(LoginController.class.getName());
 
     @javafx.fxml.FXML
-    private TextField txtContraseña;
-    @javafx.fxml.FXML
     private TextField txtCorreo;
     @javafx.fxml.FXML
     private Label info;
 
     private UserRepository userRepository;
     private AuthService authService;
+    @javafx.fxml.FXML
+    private PasswordField txtContraseña;
 
     /**
      * Inicializa el controlador después de que su elemento raíz ha sido completamente procesado.
