@@ -24,7 +24,6 @@ public class JavaFXUtil {
      * Constructor privado para evitar instanciación de la clase de utilidad.
      */
     private JavaFXUtil() {
-        // Constructor privado
     }
 
     /**

@@ -54,7 +54,6 @@ public class EditCopiaController implements Initializable {
         copiaService = new CopiaService();
         currentUser = (User) SimpleSessionService.getInstance().getObject("user");
 
-        // Configurar el ComboBox de Películas para mostrar solo el título
         comboPelicula.setConverter(new StringConverter<Pelicula>() {
             @Override
             public String toString(Pelicula pelicula) {
@@ -63,7 +62,6 @@ public class EditCopiaController implements Initializable {
 
             @Override
             public Pelicula fromString(String string) {
-                // No es necesario implementar la conversión inversa si el ComboBox no es editable
                 return null;
             }
         });
@@ -94,7 +92,7 @@ public class EditCopiaController implements Initializable {
         } else {
             logger.warning("No se encontró copia para editar en la sesión.");
             JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "No se pudo cargar la copia para editar.", "Por favor, selecciona una copia de la lista.");
-            JavaFXUtil.setScene("/org/example/reto2/main-view.fxml"); // Volver a la vista principal
+            JavaFXUtil.setScene("/org/example/reto2/main-view.fxml");
         }
         logger.info("EditCopiaController inicializado.");
     }

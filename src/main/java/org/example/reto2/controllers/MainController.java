@@ -71,14 +71,11 @@ public class MainController implements Initializable {
         colSoporte.setCellValueFactory(new PropertyValueFactory<>("soporte"));
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
 
-        // 1. Inicializar masterData y filteredData
         masterData.addAll(currentUser.getCopias());
         filteredData = new FilteredList<>(masterData, p -> true);
 
-        // 2. Añadir listener al campo de búsqueda
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(copia -> {
-                // Si el campo de búsqueda está vacío, muestra todas las copias.
                 if (newValue == null || newValue.isEmpty()) {
                     return true;
                 }
@@ -96,13 +93,10 @@ public class MainController implements Initializable {
             });
         });
 
-        // 3. Envolver la FilteredList en una SortedList.
         SortedList<Copia> sortedData = new SortedList<>(filteredData);
 
-        // 4. Vincular el comparador de SortedList al comparador de TableView.
         sortedData.comparatorProperty().bind(tableView.comparatorProperty());
 
-        // 5. Añadir los datos ordenados (y filtrados) a la tabla.
         tableView.setItems(sortedData);
 
 
@@ -122,7 +116,7 @@ public class MainController implements Initializable {
             }
         });
 
-        refreshTable(); // La llamada inicial a refreshTable ya poblará masterData
+        refreshTable();
         logger.info("MainController inicializado para el usuario: " + currentUser.getEmail());
     }
 
@@ -173,7 +167,7 @@ public class MainController implements Initializable {
                 try {
                     logger.info("Usuario confirmó eliminación/decremento de copia con ID: " + selectedCopia.getId());
                     currentUser = copiaService.deleteCopiaFromUser(currentUser, selectedCopia);
-                    SimpleSessionService.getInstance().setObject("user", currentUser); // Actualizar usuario en sesión
+                    SimpleSessionService.getInstance().setObject("user", currentUser);
                     refreshTable();
                     logger.info("Operación de eliminación/decremento de copia completada. Tabla refrescada.");
                 } catch (Exception e) {
@@ -225,10 +219,9 @@ public class MainController implements Initializable {
      */
     private void refreshTable() {
         logger.info("Refrescando tabla de copias para el usuario: " + currentUser.getEmail());
-        currentUser = (User) SimpleSessionService.getInstance().getObject("user"); // Asegurarse de tener la última versión del usuario
+        currentUser = (User) SimpleSessionService.getInstance().getObject("user");
         masterData.clear();
         masterData.addAll(currentUser.getCopias());
-        // No es necesario llamar a tableView.setItems(sortedData) de nuevo, ya está vinculado
         tableView.refresh();
         logger.info("Tabla de copias refrescada. Número de copias: " + currentUser.getCopias().size());
     }

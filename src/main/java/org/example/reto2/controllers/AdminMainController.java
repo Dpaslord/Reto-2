@@ -45,7 +45,7 @@ public class AdminMainController implements Initializable {
     @javafx.fxml.FXML
     private TableColumn<Pelicula, String> colDescripcion;
     @javafx.fxml.FXML
-    private TextField txtSearchPeliculas; // Campo de búsqueda para películas
+    private TextField txtSearchPeliculas;
 
     private PeliculaRepository peliculaRepository;
     private ObservableList<Pelicula> masterData = FXCollections.observableArrayList();
@@ -68,14 +68,11 @@ public class AdminMainController implements Initializable {
         colDirector.setCellValueFactory(new PropertyValueFactory<>("director"));
         colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
 
-        // 1. Inicializar masterData y filteredData
         masterData.addAll(peliculaRepository.findAll());
         filteredData = new FilteredList<>(masterData, p -> true);
 
-        // 2. Añadir listener al campo de búsqueda
         txtSearchPeliculas.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(pelicula -> {
-                // Si el campo de búsqueda está vacío, muestra todas las películas.
                 if (newValue == null || newValue.isEmpty()) {
                     return true;
                 }
@@ -83,26 +80,21 @@ public class AdminMainController implements Initializable {
                 String lowerCaseFilter = newValue.toLowerCase();
 
                 if (pelicula.getTitulo().toLowerCase().contains(lowerCaseFilter)) {
-                    return true; // Coincide con el título.
+                    return true;
                 } else if (pelicula.getGenero().toLowerCase().contains(lowerCaseFilter)) {
-                    return true; // Coincide con el género.
+                    return true;
                 } else if (pelicula.getDirector().toLowerCase().contains(lowerCaseFilter)) {
-                    return true; // Coincide con el director.
+                    return true;
                 }
-                return false; // No hay coincidencia.
+                return false;
             });
         });
 
-        // 3. Envolver la FilteredList en una SortedList.
         SortedList<Pelicula> sortedData = new SortedList<>(filteredData);
-
-        // 4. Vincular el comparador de SortedList al comparador de TableView.
         sortedData.comparatorProperty().bind(tableViewPeliculas.comparatorProperty());
-
-        // 5. Añadir los datos ordenados (y filtrados) a la tabla.
         tableViewPeliculas.setItems(sortedData);
 
-        refreshTable(); // La llamada inicial a refreshTable ya poblará masterData
+        refreshTable();
         logger.info("AdminMainController inicializado.");
     }
 
@@ -204,7 +196,6 @@ public class AdminMainController implements Initializable {
         logger.info("Refrescando tabla de películas.");
         masterData.clear();
         masterData.addAll(peliculaRepository.findAll());
-        // No es necesario llamar a tableViewPeliculas.setItems(sortedData) de nuevo, ya está vinculado
         tableViewPeliculas.refresh();
         logger.info("Tabla de películas refrescada. Número de películas: " + masterData.size());
     }

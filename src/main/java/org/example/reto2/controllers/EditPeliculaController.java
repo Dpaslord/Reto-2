@@ -59,7 +59,7 @@ public class EditPeliculaController implements Initializable {
         } else {
             logger.warning("No se encontró película para editar en la sesión.");
             JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "No se pudo cargar la película para editar.", "Por favor, selecciona una película de la lista.");
-            JavaFXUtil.setScene("/org/example/reto2/admin-main-view.fxml"); // Volver a la vista principal del admin
+            JavaFXUtil.setScene("/org/example/reto2/admin-main-view.fxml");
         }
         logger.info("EditPeliculaController inicializado.");
     }

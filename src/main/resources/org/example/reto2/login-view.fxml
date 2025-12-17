@@ -47,7 +47,7 @@
                 </GridPane>
                 <FlowPane alignment="CENTER" columnHalignment="CENTER" hgap="20.0" prefHeight="42.0" prefWidth="426.0" vgap="20.0">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#entrar" text="Entrar">
+                        <Button fx:id="btnEntrar" mnemonicParsing="false" onAction="#entrar" text="Entrar">
                             <padding>
                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                             </padding>

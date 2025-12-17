@@ -57,7 +57,7 @@ public class EditUserController implements Initializable {
         } else {
             logger.warning("No se encontró usuario para editar en la sesión.");
             JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "No se pudo cargar el usuario para editar.", "Por favor, selecciona un usuario de la lista.");
-            JavaFXUtil.setScene("/org/example/reto2/admin-users-view.fxml"); // Volver a la vista de gestión de usuarios
+            JavaFXUtil.setScene("/org/example/reto2/admin-users-view.fxml");
         }
         logger.info("EditUserController inicializado.");
     }
@@ -99,12 +99,12 @@ public class EditUserController implements Initializable {
             try {
                 userToEdit.setEmail(newEmail);
                 if (!newPassword.isEmpty()) {
-                    userToEdit.setPassword(newPassword); // ¡IMPORTANTE! En un entorno real, aquí se debería hashear la contraseña.
+                    userToEdit.setPassword(newPassword);
                     logger.info("Contraseña del usuario " + userToEdit.getEmail() + " será actualizada.");
                 }
                 userToEdit.setIsAdmin(isAdmin);
 
-                userRepository.save(userToEdit); // El método save ya maneja la actualización si el ID existe
+                userRepository.save(userToEdit);
                 JavaFXUtil.setScene("/org/example/reto2/admin-users-view.fxml");
                 logger.info("Usuario con ID " + userToEdit.getId() + " actualizado exitosamente. Redirigiendo a admin-users-view.");
             } catch (Exception e) {

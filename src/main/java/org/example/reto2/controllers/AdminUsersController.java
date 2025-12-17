@@ -41,9 +41,9 @@ public class AdminUsersController implements Initializable {
     @javafx.fxml.FXML
     private TableColumn<User, Boolean> colUserIsAdmin;
     @javafx.fxml.FXML
-    private TableColumn<User, Integer> colUserCopiasCount; // Para mostrar el número de copias
+    private TableColumn<User, Integer> colUserCopiasCount;
     @javafx.fxml.FXML
-    private TextField txtSearchUsers; // Campo de búsqueda para usuarios
+    private TextField txtSearchUsers;
 
     private UserRepository userRepository;
     private ObservableList<User> masterData = FXCollections.observableArrayList();
@@ -63,9 +63,7 @@ public class AdminUsersController implements Initializable {
         colUserId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colUserEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colUserIsAdmin.setCellValueFactory(new PropertyValueFactory<>("isAdmin"));
-        // Para el conteo de copias, necesitamos una PropertyValueFactory personalizada o un getter en User
         colUserCopiasCount.setCellValueFactory(cellData -> {
-            // Asegurarse de que la lista de copias esté inicializada para evitar NullPointerException
             if (cellData.getValue().getCopias() != null) {
                 return new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getCopias().size()).asObject();
             }
@@ -73,14 +71,11 @@ public class AdminUsersController implements Initializable {
         });
 
 
-        // 1. Inicializar masterData y filteredData
         masterData.addAll(userRepository.findAll());
         filteredData = new FilteredList<>(masterData, p -> true);
 
-        // 2. Añadir listener al campo de búsqueda
         txtSearchUsers.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(user -> {
-                // Si el campo de búsqueda está vacío, muestra todos los usuarios.
                 if (newValue == null || newValue.isEmpty()) {
                     return true;
                 }
@@ -88,19 +83,16 @@ public class AdminUsersController implements Initializable {
                 String lowerCaseFilter = newValue.toLowerCase();
 
                 if (user.getEmail().toLowerCase().contains(lowerCaseFilter)) {
-                    return true; // Coincide con el email.
+                    return true;
                 }
-                return false; // No hay coincidencia.
+                return false;
             });
         });
 
-        // 3. Envolver la FilteredList en una SortedList.
         SortedList<User> sortedData = new SortedList<>(filteredData);
 
-        // 4. Vincular el comparador de SortedList al comparador de TableView.
         sortedData.comparatorProperty().bind(tableViewUsers.comparatorProperty());
 
-        // 5. Añadir los datos ordenados (y filtrados) a la tabla.
         tableViewUsers.setItems(sortedData);
 
         refreshTable();
@@ -145,7 +137,6 @@ public class AdminUsersController implements Initializable {
     public void deleteUser(ActionEvent actionEvent) {
         User selectedUser = tableViewUsers.getSelectionModel().getSelectedItem();
         if (selectedUser != null) {
-            // Impedir que el administrador se elimine a sí mismo
             User currentUser = (User) SimpleSessionService.getInstance().getObject("user");
             if (currentUser != null && currentUser.getId().equals(selectedUser.getId())) {
                 JavaFXUtil.showModal(Alert.AlertType.ERROR, "Acción no permitida", "No puede eliminarse a sí mismo.", "");

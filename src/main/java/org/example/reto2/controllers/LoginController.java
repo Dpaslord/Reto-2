@@ -2,13 +2,19 @@ package org.example.reto2.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import org.example.reto2.session.AuthService;
 import org.example.reto2.session.SimpleSessionService;
 import org.example.reto2.user.User;
 import org.example.reto2.user.UserRepository;
 import org.example.reto2.utils.DataProvider;
 import org.example.reto2.utils.JavaFXUtil;
+import org.hibernate.SessionFactory;
 
 import java.net.URL;
 import java.util.Optional;
@@ -25,14 +31,16 @@ public class LoginController implements Initializable {
     private static final Logger logger = Logger.getLogger(LoginController.class.getName());
 
     @javafx.fxml.FXML
+    private TextField txtContraseña;
+    @javafx.fxml.FXML
     private TextField txtCorreo;
     @javafx.fxml.FXML
     private Label info;
+    @javafx.fxml.FXML
+    private Button btnEntrar;
 
     private UserRepository userRepository;
     private AuthService authService;
-    @javafx.fxml.FXML
-    private PasswordField txtContraseña;
 
     /**
      * Inicializa el controlador después de que su elemento raíz ha sido completamente procesado.
@@ -43,7 +51,21 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         logger.info("Inicializando LoginController.");
-        userRepository = new UserRepository(DataProvider.getSessionFactory());
+        
+        SessionFactory sessionFactory = DataProvider.getSessionFactory();
+        if (sessionFactory == null) {
+            logger.severe("No se pudo establecer conexión con la base de datos. Deshabilitando controles de login.");
+
+            info.setText("Error de conexión. Verifique Docker y reinicie.");
+            info.setStyle("-fx-text-fill: red;");
+
+            txtCorreo.setDisable(true);
+            txtContraseña.setDisable(true);
+            btnEntrar.setDisable(true);
+            return;
+        }
+
+        userRepository = new UserRepository(sessionFactory);
         authService = new AuthService(userRepository);
         logger.info("LoginController inicializado.");
     }
@@ -80,8 +102,9 @@ public class LoginController implements Initializable {
                 Optional<ButtonType> result = alert.showAndWait();
 
                 if (result.isEmpty() || result.get() == ButtonType.CANCEL) {
-                    // Caso: el usuario cierra el diálogo con la 'X' o pulsa "Cancelar"
                     sessionService.logout();
+                    txtCorreo.clear();
+                    txtContraseña.clear();
                     info.setText("Inicio de sesión cancelado.");
                     logger.info("Administrador canceló la selección, cerrando sesión.");
                 } else if (result.get() == btnPeliculas) {

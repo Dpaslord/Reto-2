@@ -89,7 +89,6 @@ public class AddPeliculaController implements Initializable {
             return;
         }
 
-        // Validación de campos no numéricos
         if (!txtGenero.getText().matches(".*[a-zA-Z]+.*")) {
             JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Género Inválido", "El género no puede ser solo números.", "");
             logger.warning("Intento de añadir película con género puramente numérico.");
@@ -102,7 +101,6 @@ public class AddPeliculaController implements Initializable {
         }
 
         try {
-            // Validar y parsear el año
             String anioStr = txtAnio.getText();
             if (!anioStr.matches("\\d{4}")) {
                 JavaFXUtil.showModal(Alert.AlertType.WARNING, "Formato de Año Inválido", "El año debe ser un número de 4 dígitos.", "");
@@ -115,8 +113,6 @@ public class AddPeliculaController implements Initializable {
                 logger.warning("Año fuera de rango al intentar añadir película: " + anio);
                 return;
             }
-
-            // Comprobar si ya existe una película con los mismos atributos
             Optional<Pelicula> existingPelicula = peliculaRepository.findByAttributes(txtTitulo.getText(), anio, txtDirector.getText());
             if (existingPelicula.isPresent()) {
                 JavaFXUtil.showModal(Alert.AlertType.WARNING, "Película Duplicada", "Ya existe una película con el mismo título, año y director.", "");

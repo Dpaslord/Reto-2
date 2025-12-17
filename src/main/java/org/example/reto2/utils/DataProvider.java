@@ -3,6 +3,7 @@ package org.example.reto2.utils;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -24,8 +25,7 @@ public class DataProvider {
     /**
      * Obtiene la SessionFactory de Hibernate. Si no ha sido inicializada, la configura
      * utilizando el archivo hibernate.cfg.xml y las variables de entorno para las credenciales de la DB.
-     *
-     * @return La SessionFactory de Hibernate.
+     * @return La SessionFactory de Hibernate, o null si la inicialización falla.
      */
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
@@ -46,8 +46,8 @@ public class DataProvider {
                 sessionFactory = configuration.buildSessionFactory();
                 logger.info("SessionFactory de Hibernate inicializada exitosamente.");
             } catch (Exception e) {
-                logger.severe("Error al inicializar la SessionFactory de Hibernate: " + e.getMessage());
-                throw new ExceptionInInitializerError(e);
+                logger.log(Level.SEVERE, "Error al inicializar la SessionFactory de Hibernate: " + e.getMessage(), e);
+                return null;
             }
         }
         return sessionFactory;

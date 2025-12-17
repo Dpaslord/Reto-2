@@ -57,7 +57,6 @@ public class AddCopiaController implements Initializable {
         copiaService = new CopiaService();
         currentUser = (User) SimpleSessionService.getInstance().getObject("user");
 
-        // Configurar el ComboBox de Películas para mostrar solo el título
         comboPelicula.setItems(FXCollections.observableList(peliculaRepository.findAll()));
         comboPelicula.setConverter(new StringConverter<Pelicula>() {
             @Override

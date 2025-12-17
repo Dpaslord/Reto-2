@@ -85,7 +85,7 @@ public class AddUserController implements Initializable {
         try {
             User newUser = new User();
             newUser.setEmail(email);
-            newUser.setPassword(password); // ¡IMPORTANTE! En un entorno real, aquí se debería hashear la contraseña.
+            newUser.setPassword(password);
             newUser.setIsAdmin(isAdmin);
 
             userRepository.save(newUser);
